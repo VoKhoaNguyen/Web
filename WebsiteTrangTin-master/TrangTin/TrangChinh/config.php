@@ -2,7 +2,7 @@
 $servername = "localhost";
 $username = "root";
 $password = "vertrigo";  // Rỗng mặc định
-$dbname = "tincuongnghe_db";
+$dbname = "tincongnghe_db";
 
 try {
     $pdo = new PDO("mysql:host=$servername;dbname=$dbname;charset=utf8", $username, $password);
