@@ -7,27 +7,8 @@ include 'config.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tin Công Nghệ - Trang tin công nghệ hàng đầu Việt Nam</title>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* Layout cơ bản */
-        .main-content { display: flex; gap: 20px; margin: 20px; }
-        .left-banner { width: 200px; }
-        .latest-news-left { flex: 2; display: flex; flex-wrap: wrap; gap: 15px; }
-        .news-card { width: calc(50% - 7.5px); border: 1px solid #ddd; border-radius: 6px; overflow: hidden; }
-        .news-image { width: 100%; height: 150px; object-fit: cover; }
-        .news-content { padding: 10px; }
-        .news-meta { font-size: 12px; color: #888; }
-        .news-title { font-size: 16px; margin: 5px 0; }
-        .news-excerpt { font-size: 14px; color: #555; }
-        .news-time { font-size: 12px; color: #aaa; }
-
-        .latest-news-right { flex: 1; display: flex; flex-direction: column; gap: 20px; }
-        .category-box { border: 1px solid #ddd; border-radius: 6px; overflow: hidden; }
-        .category-box h3 { background: #f4f4f4; margin: 0; padding: 8px; font-size: 14px; }
-        .category-main { display: flex; gap: 10px; padding: 10px; }
-        .category-main img { width: 80px; height: 60px; object-fit: cover; }
-        .category-main h4 { font-size: 14px; margin: 0; }
-    </style>
 </head>
 <body>
 
@@ -56,80 +37,123 @@ include 'config.php';
 </header>
 
 <main>
-    <div class="main-content">
-        <!-- Banner trái -->
-        <div class="left-banner">
-            <p>Quảng cáo</p>
-            <img src="ads.jpg" alt="Banner">
-        </div>
+  <div class="main-content">
+    
+    <!-- Banner trái -->
+    <aside class="left-banner">
+    <p>Quảng cáo</p>
+    <div class="ad-video">
+        <iframe width="170" height="300"
+        src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1&loop=1&playlist=M1pA9YPbHd4"
+        title="YouTube video quảng cáo"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+        </iframe>
+    </div>
+    </aside>
 
-        <!-- Cột trái: bài viết mới -->
-        <div class="latest-news-left">
-            <?php
-            $sql = "SELECT b.*, d.ten_danhmuc 
-                    FROM baiviet b
-                    LEFT JOIN danhmuc d ON b.id_danhmuc = d.id
-                    ORDER BY b.ngay_dang DESC
-                    LIMIT 6";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute();
-            $baiviets = $stmt->fetchAll(PDO::FETCH_ASSOC);
+ <!-- Nội dung chính -->
+  <section class="center-content">
+    <h2 class="section-title">Tin mới</h2>
 
-            if ($baiviets) {
-                foreach ($baiviets as $row) {
-                    echo '<div class="news-card">';
-						echo '<a href="detail.php?id='.$row['id'].'">';
-							echo '<img src="'.$row['hinh_anh'].'" class="news-image" alt="">';
-								echo '</a>';
-									echo '<div class="news-content">';
-										echo '<div class="news-meta">'.$row['ten_danhmuc'].'</div>';
-											echo '<h2 class="news-title"><a href="detail.php?id='.$row['id'].'">'.$row['tieu_de'].'</a></h2>';
-												echo '<p class="news-excerpt">'.$row['mo_ta_ngan'].'</p>';
-													echo '<div class="news-time">'.date('H:i d/m/Y', strtotime($row['ngay_dang'])).'</div>';
-														echo '</div></div>';
-
-                }
-            } else {
-                echo "<p>Không có dữ liệu bài viết</p>";
-            }
-            ?>
-        </div>
-
-        <!-- Cột phải: bài hot -->
-        <!-- Cột phải: bài hot -->
-<div class="latest-news-right">
     <?php
-    $sql_hot = "SELECT bh.vi_tri, b.id, b.tieu_de, b.hinh_anh, d.ten_danhmuc
-                FROM baiviet_hot bh
-                JOIN baiviet b ON bh.id_baiviet = b.id
-                LEFT JOIN danhmuc d ON b.id_danhmuc = d.id
-                ORDER BY bh.vi_tri ASC";
-    $stmt_hot = $pdo->prepare($sql_hot);
-    $stmt_hot->execute();
-    $hot_news = $stmt_hot->fetchAll(PDO::FETCH_ASSOC);
+    // Lấy 1 tin lớn + 1 tin nhỏ bên phải
+    $sql = "SELECT b.id, b.tieu_de, b.mo_ta_ngan, b.hinh_anh, l.ten_linhvuc 
+            FROM baiviet b 
+            LEFT JOIN linhvuc l ON b.id_linhvuc = l.id
+            ORDER BY b.ngay_dang DESC LIMIT 2";
+    $result = $conn->query($sql);
 
-    if ($hot_news) {
-        foreach ($hot_news as $row) {
-            echo '<div class="category-main">';
-                echo '<a href="detail.php?id='.$row['id'].'">';
-                    echo '<img src="'.$row['hinh_anh'].'" alt="">';
-                echo '</a>';
-                echo '<div>';
-                    echo '<h4><a href="detail.php?id='.$row['id'].'">'.$row['tieu_de'].'</a></h4>';
-                    if (!empty($row['ten_danhmuc'])) {
-                        echo '<div class="news-meta">'.$row['ten_danhmuc'].'</div>';
-                    }
-                echo '</div>';
-            echo '</div>';
+    if ($result && $result->num_rows > 0) {
+        $i = 0;
+        echo '<div class="featured-news">';
+        while ($row = $result->fetch_assoc()) {
+            if ($i == 0) {
+                // Tin lớn
+                echo '<article class="news-card large">
+                        <a href="chitiet.php?id='.$row['id'].'">
+                          <img src="'.$row['hinh_anh'].'" alt="'.$row['tieu_de'].'">
+                        </a>
+                        <div class="news-info">
+                          <span class="news-meta">'.$row['ten_linhvuc'].'</span>
+                          <h3 class="news-title"><a href="chitiet.php?id='.$row['id'].'">'.$row['tieu_de'].'</a></h3>
+                          <p class="news-excerpt">'.$row['mo_ta_ngan'].'</p>
+                        </div>
+                      </article>';
+            } else {
+                // Tin nhỏ
+                echo '<article class="news-card small">
+                        <a href="chitiet.php?id='.$row['id'].'">
+                          <img src="'.$row['hinh_anh'].'" alt="'.$row['tieu_de'].'">
+                        </a>
+                        <div class="news-info">
+                          <span class="news-meta">'.$row['ten_linhvuc'].'</span>
+                          <h3 class="news-title"><a href="chitiet.php?id='.$row['id'].'">'.$row['tieu_de'].'</a></h3>
+                          <p class="news-excerpt">'.$row['mo_ta_ngan'].'</p>
+                        </div>
+                      </article>';
+            }
+            $i++;
         }
-    } else {
-        echo "<p>Không có bài hot</p>";
+        echo '</div>';
     }
     ?>
-</div>
 
+    <!-- Grid tin nhỏ -->
+    <div class="news-grid">
+      <?php
+      $sql = "SELECT b.id, b.tieu_de,b.mo_ta_ngan, b.hinh_anh, l.ten_linhvuc 
+              FROM baiviet b 
+              LEFT JOIN linhvuc l ON b.id_linhvuc = l.id
+              ORDER BY b.ngay_dang DESC LIMIT 2,4";
+      $result = $conn->query($sql);
 
+      if ($result && $result->num_rows > 0) {
+          while ($row = $result->fetch_assoc()) {
+              echo '<article class="news-card">
+                      <a href="chitiet.php?id='.$row['id'].'">
+                        <img src="'.$row['hinh_anh'].'" alt="'.$row['tieu_de'].'">
+                      </a>
+                      <div class="news-info">
+                        <span class="news-meta">'.$row['ten_linhvuc'].'</span>
+                        <h3 class="news-title"><a href="chitiet.php?id='.$row['id'].'">'.$row['tieu_de'].'</a></h3>
+                        <p class="news-excerpt">'.$row['mo_ta_ngan'].'</p>
+                      </div>
+                    </article>';
+          }
+      }
+      ?>
     </div>
+  </section>
+
+  <!-- Sidebar phải -->
+  <aside class="right-sidebar">
+    <h2 class="section-title">Tin theo ngày</h2>
+    <?php
+    $sql = "SELECT b.id, b.tieu_de, b.hinh_anh, l.ten_linhvuc 
+            FROM baiviet b 
+            LEFT JOIN linhvuc l ON b.id_linhvuc = l.id
+            ORDER BY b.ngay_dang DESC LIMIT 5";
+    $result = $conn->query($sql);
+
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            echo '<div class="hot-item">
+                    <a href="chitiet.php?id='.$row['id'].'">
+                      <img src="'.$row['hinh_anh'].'" alt="'.$row['tieu_de'].'" class="hot-thumb">
+                    </a>
+                    <div class="hot-info">
+                      <h4><a href="chitiet.php?id='.$row['id'].'">'.$row['tieu_de'].'</a></h4>
+                      <span class="news-meta">'.$row['ten_linhvuc'].'</span>
+                    </div>
+                  </div>';
+        }
+    }
+    ?>
+  </aside>
+    
+  </div>
 </main>
 
 <footer class="footer">
